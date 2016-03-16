@@ -5,13 +5,13 @@ android:
     -android-23
     
 before_install:
-  curl -L http://dl.google.com/android/repository/android-ndk-r11-linux-x86_64.zip >android-ndk.zip
-  sudo tar -C /opt -jxf android-ndk.zip
-  export $NDK_HOME=android-ndk-r11
+  -curl -L http://dl.google.com/android/repository/android-ndk-r11-linux-x86_64.zip >android-ndk.zip
+  -sudo tar -C /opt -jxf android-ndk.zip
+  -export $NDK_HOME=android-ndk-r11
 
 install:
-  chmod +x gradlew
-  git submodule update --init
-  gradlew app:copyNotice
-  gradlew daogenerator:executeDaoGenerator 
-  gradlew app:assembleDebug
+  -chmod +x gradlew
+  -git submodule update --init
+  -gradlew app:copyNotice
+  -gradlew daogenerator:executeDaoGenerator 
+  -gradlew app:assembleDebug
