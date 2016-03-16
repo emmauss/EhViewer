@@ -3,8 +3,9 @@ language: android
 android:
   components:
     - tools
+    - platform-tools
     - build-tools-23.0.2
-    - android-23
+    - android-24
     
 before_install:
   - wget http://dl.google.com/android/repository/android-ndk-r11-linux-x86_64.zip
