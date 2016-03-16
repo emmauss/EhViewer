@@ -6,8 +6,8 @@ android:
     
 before_install:
   - wget http://dl.google.com/android/repository/android-ndk-r11-linux-x86_64.zip
-  - unzip -qq android-ndk-r11-linux-x86_64
-  - export $NDK_HOME=/home/travis/emmauss/EhViewer/android-ndk-r11
+  - unzip -qq android-ndk-r11-linux-x86_64 -d /opt
+  - export $NDK_HOME=/opt/android-ndk-r11
   
 
 install:
