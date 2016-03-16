@@ -1,3 +1,4 @@
+sudo: required
 language: android
 android:
   components:
@@ -6,7 +7,7 @@ android:
     
 before_install:
   - wget http://dl.google.com/android/repository/android-ndk-r11-linux-x86_64.zip
-  - unzip -qq android-ndk-r11-linux-x86_64 -d /opt
+  - sudo unzip -qq android-ndk-r11-linux-x86_64 -d /opt
   - export NDK_HOME=/opt/android-ndk-r11
   
 
