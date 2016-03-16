@@ -15,15 +15,13 @@
   ~ limitations under the License.
   -->
 
-<vector
+<Button
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="168dp"
-    android:width="168dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-
-    <path
-        android:fillColor="@android:color/black"
-        android:pathData="@string/pd_sad_panda"/>
-
-</vector>
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/get_it"
+    android:textStyle="bold"
+    android:background="@null"
+    android:textSize="@dimen/text_little_small"
+    android:textAllCaps="true"
+    android:textColor="@android:color/white"/>

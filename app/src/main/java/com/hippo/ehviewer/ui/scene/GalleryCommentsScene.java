@@ -19,6 +19,7 @@ package com.hippo.ehviewer.ui.scene;
 import android.animation.Animator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -53,6 +54,7 @@ import com.hippo.scene.StageActivity;
 import com.hippo.text.Html;
 import com.hippo.text.URLImageGetter;
 import com.hippo.util.ActivityHelper;
+import com.hippo.util.DrawableManager;
 import com.hippo.util.ReadableTime;
 import com.hippo.util.TextUrl;
 import com.hippo.view.ViewTransition;
@@ -60,6 +62,7 @@ import com.hippo.widget.LinkifyTextView;
 import com.hippo.yorozuya.AnimationUtils;
 import com.hippo.yorozuya.LayoutUtils;
 import com.hippo.yorozuya.SimpleAnimatorListener;
+import com.hippo.yorozuya.ViewUtils;
 
 public final class GalleryCommentsScene extends ToolbarScene
         implements EasyRecyclerView.OnItemClickListener,
@@ -134,11 +137,17 @@ public final class GalleryCommentsScene extends ToolbarScene
             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.scene_gallery_comments, container, false);
         EasyRecyclerView recyclerView = (EasyRecyclerView) view.findViewById(R.id.recycler_view);
-        View tip = view.findViewById(R.id.tip);
-        mEditPanel = view.findViewById(R.id.edit_panel);
-        mSendImage = (ImageView) mEditPanel.findViewById(R.id.send);
-        mEditText = (EditText) mEditPanel.findViewById(R.id.edit_text);
-        mFab = (FloatingActionButton) view.findViewById(R.id.fab);
+        TextView tip = (TextView) ViewUtils.$$(view, R.id.tip);
+        mEditPanel = ViewUtils.$$(view, R.id.edit_panel);
+        mSendImage = (ImageView) ViewUtils.$$(mEditPanel, R.id.send);
+        mEditText = (EditText) ViewUtils.$$(mEditPanel, R.id.edit_text);
+        mFab = (FloatingActionButton) ViewUtils.$$(view, R.id.fab);
+
+        int paddingBottomFab = getResources().getDimensionPixelOffset(R.dimen.list_padding_bottom_fab);
+
+        Drawable drawable = DrawableManager.getDrawable(getContext(), R.drawable.big_weird_face);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        tip.setCompoundDrawables(null, drawable, null, null);
 
         mAdapter = new CommentAdapter();
         recyclerView.setAdapter(mAdapter);
@@ -153,6 +162,8 @@ public final class GalleryCommentsScene extends ToolbarScene
         recyclerView.setHasFixedSize(true);
         recyclerView.setOnItemClickListener(this);
         recyclerView.setOnItemLongClickListener(this);
+        recyclerView.setPadding(recyclerView.getPaddingLeft(), recyclerView.getPaddingTop(),
+                recyclerView.getPaddingRight(), recyclerView.getPaddingBottom() + paddingBottomFab);
 
         mSendImage.setOnClickListener(this);
         mFab.setOnClickListener(this);
@@ -184,7 +195,7 @@ public final class GalleryCommentsScene extends ToolbarScene
 
     @Override
     public void onNavigationClick() {
-        finish();
+        onBackPressed();
     }
 
     @Override

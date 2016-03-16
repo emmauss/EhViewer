@@ -15,15 +15,20 @@
   ~ limitations under the License.
   -->
 
-<vector
+
+<com.hippo.widget.IndicatingScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="120dp"
-    android:width="120dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    style="@style/Indicating"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1">
 
-    <path
-        android:fillColor="@color/big_icon"
-        android:pathData="@string/pd_big_download"/>
+    <com.hippo.ehviewer.widget.CategoryTable
+        android:id="@+id/category_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="?attr/dialogPreferredPadding"
+        android:paddingTop="@dimen/abc_dialog_padding_top_material"
+        android:paddingRight="?attr/dialogPreferredPadding"/>
 
-</vector>
+</com.hippo.widget.IndicatingScrollView>

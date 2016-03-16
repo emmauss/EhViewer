@@ -85,7 +85,12 @@
 
     <!-- Crash -->
     <string name="send">发送</string>
-    <string name="crash_explain">上次应用崩溃了。你愿意把错误日志发送给开发者以便以后得到更好的用户体验么？（以电子邮件的形式发送）</string>
+    <string name="crash_explain">上次应用崩溃了。你愿意把错误日志发送给开发者以便以后得到更好的用户体验？（以电子邮件的形式发送）</string>
+
+    <!-- Update -->
+    <string name="update">更新</string>
+    <string name="update_plain">版本：%1$s\n大小：%2$s\n\n%3$s</string>
+    <string name="update_to_date">EhViewer 已是最新版本</string>
 
     <!-- Gallery List -->
     <string name="gallery_list_search_bar_hint">搜索 ExHentai</string>
@@ -275,53 +280,111 @@
     <string name="image_saved">图片已保存至 %s</string>
 
     <!-- Settings -->
-    <string name="settings_eh_title">EH</string>
-    <string name="settings_eh_show_jpn_title_title">显示日文标题</string>
+    <string name="settings_eh">EH</string>
+    <string name="settings_eh_sign_out">退出登陆</string>
+    <string name="settings_eh_sign_out_summary">退出登陆后重启应用以便再次登陆</string>
+    <string name="settings_eh_sign_out_warning">天哪，我的老伙计，你要退出登录吗？我是说，你真的要退出登录吗？</string>
+    <string name="settings_eh_sign_out_yes">是的，我是说，真的</string>
+    <string name="settings_eh_sign_out_tip">已退出登陆，重启应用以便再次登陆</string>
+    <string name="settings_eh_list_mode">列表模式</string>
+    <string name="settings_eh_list_mode_detail">详情</string>
+    <string name="settings_eh_list_mode_thumb">缩略图</string>
+    <string name="settings_eh_default_categories">主页分类显示</string>
+    <string name="settings_eh_default_categories_summary">默认在主页所显示的分类</string>
+    <string name="settings_eh_excluded_tag_namespaces">排除标签组</string>
+    <string name="settings_eh_excluded_tag_namespaces_summary">在默认搜索中排除指定标签组</string>
+    <string name="settings_eh_excluded_languages">排除语言</string>
+    <string name="settings_eh_excluded_languages_summary">在主页与搜索中隐藏指定语言的画廊</string>
+    <string name="settings_eh_show_jpn_title">显示日文标题</string>
     <string name="settings_eh_show_jpn_title_summary_on">尝试显示日文标题。这会使获取画廊列表花费更多时间</string>
     <string name="settings_eh_show_jpn_title_summary_off">显示默认标题。一般是英文标题</string>
 
-    <string name="settings_read_title">阅读</string>
+    <string name="settings_read">阅读</string>
     <string name="settings_read_reading_direction_title">阅读方向</string>
     <string name="settings_read_reading_direction_left_to_right">从左至右</string>
     <string name="settings_read_reading_direction_right_to_Left">从右至左</string>
     <string name="settings_read_reading_direction_top_to_bottom">从上至下</string>
-    <string name="settings_read_page_scaling_title">页面缩放</string>
+    <string name="settings_read_page_scaling">页面缩放</string>
     <string name="settings_read_page_scaling_actual_size">原始尺寸</string>
     <string name="settings_read_page_scaling_fit_to_width">匹配宽度</string>
     <string name="settings_read_page_scaling_fit_to_height">匹配长度</string>
     <string name="settings_read_page_scaling_fit_to_screen">匹配屏幕</string>
     <string name="settings_read_page_scaling_fixed_scale">固定缩放</string>
-    <string name="settings_read_start_position_title">开页位置</string>
+    <string name="settings_read_start_position">开页位置</string>
     <string name="settings_read_start_position_top_left">左上角</string>
     <string name="settings_read_start_position_top_right">右上角</string>
     <string name="settings_read_start_position_bottom_left">左下角</string>
     <string name="settings_read_start_position_bottom_right">右下角</string>
     <string name="settings_read_start_position_center">中心</string>
-    <string name="settings_read_keep_screen_on_title">屏幕常亮</string>
-    <string name="settings_read_show_clock_title">显示时钟</string>
-    <string name="settings_read_show_battery_title">显示电量</string>
-    <string name="settings_read_volume_page_title">使用音量键翻页</string>
+    <string name="settings_read_keep_screen_on">屏幕常亮</string>
+    <string name="settings_read_show_clock">显示时钟</string>
+    <string name="settings_read_show_battery">显示电量</string>
+    <string name="settings_read_volume_page">使用音量键翻页</string>
 
-    <string name="settings_download_title">下载</string>
-    <string name="settings_download_download_location_title">下载路径</string>
+    <string name="settings_download">下载</string>
+    <string name="settings_download_download_location">下载路径</string>
     <string name="settings_download_invalid_download_location">无效的下载路径</string>
     <string name="settings_download_cant_get_download_location">无法获取下载路径</string>
     <string name="settings_download_pick_dir_kk">在 KitKat 中您无法把数据写入外置 SD 卡，除非您做了奇怪的事情</string>
     <string name="settings_download_pick_dir_l">Lollipop 提供了新的写入外置 SD 卡的 API。如果您想把下载路径设置到外置 SD 卡上，点击 \"文档\" 按钮</string>
     <string name="settings_download_document">文档</string>
+    <string name="settings_download_restore_download_items">恢复下载项</string>
+    <string name="settings_download_restore_download_items_summary">恢复下载目录里的所有下载项</string>
+    <string name="settings_download_multi_thread_download">下载线程数</string>
+    <string name="settings_download_multi_thread_download_summary">最多同时下载 %s 张图片</string>
+    <string name="settings_download_preload_image">预载图片</string>
+    <string name="settings_download_preload_image_summary">向后预载 %s 张图片</string>
+    <string name="settings_download_restoring">恢复中</string>
+    <string name="settings_download_restore_not_found">未找到可恢复下载项</string>
+    <string name="settings_download_restore_failed">恢复失败</string>
+    <string name="settings_download_restore_successfully">成功恢复 %s 项</string>
 
-    <string name="settings_about_title">关于</string>
-    <string name="settings_about_author_title">作者</string>
-    <string name="settings_about_google_plus_title">Google+ 社群</string>
-    <string name="settings_about_website_title">网站</string>
-    <string name="settings_about_source_title">源码</string>
-    <string name="settings_about_changelog_title">更新日志</string>
-    <string name="settings_about_license_title">开源许可</string>
+    <string name="settings_advanced">高级</string>
+    <string name="settings_about_save_parse_error_body">解析失败时保存页面内容</string>
+    <string name="settings_about_save_parse_error_body_summary">页面内容可能含有隐私敏感信息</string>
+
+    <string name="settings_about">关于</string>
+    <string name="settings_about_author">作者</string>
+    <string name="settings_about_google_plus">Google+ 社群</string>
+    <string name="settings_about_website">网站</string>
+    <string name="settings_about_source">源码</string>
+    <string name="settings_about_changelog">更新日志</string>
+    <string name="settings_about_license">开源许可</string>
     <string name="settings_about_donate">捐赠</string>
     <string name="settings_about_donate_message">你的捐赠能帮助我开发更多更好的应用。\n\n支付宝：seven332$163.com</string>
     <string name="settings_about_enable_analytics">启用数据统计</string>
     <string name="settings_about_about_analytics">关于数据统计</string>
+    <string name="settings_about_check_for_updates">检查更新</string>
+    <string name="settings_about_beta_update_channel">更新测试版</string>
 
+    <!-- ExcludedLanguagesScene -->
+    <string name="excluded_languages">排除语言</string>
+    <string name="select_all">全选</string>
+    <string name="deselect_all">全取消</string>
+    <string name="invert_selection">反选</string>
+    <string name="language">语言</string>
+    <string name="original">原作</string>
+    <string name="translated">翻译</string>
+    <string name="rewrite">改写</string>
+    <string name="language_japanese">日语</string>
+    <string name="language_english">英语</string>
+    <string name="language_chinese">汉语</string>
+    <string name="language_dutch">荷兰语</string>
+    <string name="language_french">法语</string>
+    <string name="language_german">德语</string>
+    <string name="language_hungarian">匈牙利语</string>
+    <string name="language_italian">意大利语</string>
+    <string name="language_korean">韩语</string>
+    <string name="language_polish">波兰语</string>
+    <string name="language_portuguese">葡萄牙语</string>
+    <string name="language_russian">俄语</string>
+    <string name="language_spanish">西班牙语</string>
+    <string name="language_thai">泰语</string>
+    <string name="language_vietnamese">越南语</string>
+    <string name="language_na">N/A</string>
+    <string name="language_other">其他</string>
+
+    <!-- License -->
     <string name="license">开源许可</string>
 
     <!-- Dir Picker-->
@@ -344,6 +407,16 @@
 
     <!-- Progress Scene -->
     <string name="error_something_wrong_happened">被玩坏了</string>
+
+    <!-- Guide -->
+    <string name="guide_quick_search_title">快速搜索</string>
+    <string name="guide_quick_search_text">从右侧滑动打开快速搜索面板</string>
+    <string name="guide_collections_title">收藏夹</string>
+    <string name="guide_collections_text">从右侧滑动来选择收藏夹</string>
+    <string name="guide_download_labels_title">下载标签</string>
+    <string name="guide_download_labels_text">从右侧滑动打开下载标签面板</string>
+    <string name="guide_download_thumb_title">画廊详情</string>
+    <string name="guide_download_thumb_text">点击缩略图查看画廊详情</string>
 
     <!-- Readable Time -->
     <string name="from_the_future">来自未来</string>

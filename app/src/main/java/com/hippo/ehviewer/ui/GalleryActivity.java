@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -74,6 +75,7 @@ public class GalleryActivity extends TrackedActivity
     public static final String KEY_GALLERY_INFO = "gallery_info";
     public static final String KEY_PAGE = "page";
     public static final String KEY_SHOWING = "showing";
+    public static final String KEY_CURRENT_INDEX = "current_index";
 
     private static final long SLIDER_ANIMATION_DURING = 150;
     private static final long HIDE_SLIDER_DELAY = 3000;
@@ -178,7 +180,8 @@ public class GalleryActivity extends TrackedActivity
         mAction = savedInstanceState.getString(KEY_ACTION);
         mFilename = savedInstanceState.getString(KEY_FILENAME);
         mGalleryInfo = savedInstanceState.getParcelable(KEY_GALLERY_INFO);
-        mPage = savedInstanceState.getInt(KEY_ACTION, -1);
+        mPage = savedInstanceState.getInt(KEY_PAGE, -1);
+        mCurrentIndex = savedInstanceState.getInt(KEY_CURRENT_INDEX);
         buildProvider();
     }
 
@@ -192,6 +195,7 @@ public class GalleryActivity extends TrackedActivity
         }
         outState.putBoolean(KEY_SHOWING, mSystemUiShowing);
         outState.putInt(KEY_PAGE, mPage);
+        outState.putInt(KEY_CURRENT_INDEX, mCurrentIndex);
     }
 
     @Override
@@ -229,7 +233,13 @@ public class GalleryActivity extends TrackedActivity
         glRootView.setContentPane(mGalleryView);
 
         // System UI helper
-        mSystemUiHelper = new SystemUiHelper(this, SystemUiHelper.LEVEL_IMMERSIVE,
+        int systemUiLevel;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            systemUiLevel = SystemUiHelper.LEVEL_IMMERSIVE;
+        } else {
+            systemUiLevel = SystemUiHelper.LEVEL_LOW_PROFILE;
+        }
+        mSystemUiHelper = new SystemUiHelper(this, systemUiLevel,
                 SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES | SystemUiHelper.FLAG_IMMERSIVE_STICKY);
         if (savedInstanceState == null || !savedInstanceState.getBoolean(KEY_SHOWING, false)) {
             mSystemUiHelper.hide();
@@ -347,7 +357,6 @@ public class GalleryActivity extends TrackedActivity
         // Check keyboard and Dpad
         switch (keyCode) {
             case KeyEvent.KEYCODE_PAGE_UP:
-            case KeyEvent.KEYCODE_DPAD_LEFT:
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (mLayoutMode == GalleryView.LAYOUT_MODE_RIGHT_TO_LEFT) {
                     mGalleryView.pageRight();
@@ -355,14 +364,19 @@ public class GalleryActivity extends TrackedActivity
                     mGalleryView.pageLeft();
                 }
                 return true;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                mGalleryView.pageLeft();
+                return true;
             case KeyEvent.KEYCODE_PAGE_DOWN:
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (mLayoutMode == GalleryView.LAYOUT_MODE_RIGHT_TO_LEFT) {
                     mGalleryView.pageLeft();
                 } else {
                     mGalleryView.pageRight();
                 }
+                return true;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                mGalleryView.pageRight();
                 return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_SPACE:

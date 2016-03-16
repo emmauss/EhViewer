@@ -16,48 +16,57 @@
   -->
 
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Preference
         android:key="author"
-        android:title="@string/settings_about_author_title"/>
+        android:title="@string/settings_about_author"/>
 
     <Preference
         android:key="google_plus"
-        android:title="@string/settings_about_google_plus_title"/>
+        android:title="@string/settings_about_google_plus"/>
 
     <Preference
         android:key="website"
-        android:title="@string/settings_about_website_title"/>
+        android:title="@string/settings_about_website"/>
 
     <Preference
         android:key="source"
-        android:title="@string/settings_about_source_title"/>
+        android:title="@string/settings_about_source"/>
 
     <Preference
         android:key="changelog"
-        android:title="@string/settings_about_changelog_title"/>
+        android:title="@string/settings_about_changelog"/>
 
-    <Preference
+    <com.hippo.preference.ActivityPreference
         android:key="license"
-        android:title="@string/settings_about_license_title"/>
+        android:title="@string/settings_about_license"
+        app:activity="com.hippo.ehviewer.ui.LicenseActivity"/>
 
     <Preference
         android:key="donate"
         android:title="@string/settings_about_donate"/>
 
-    <com.hippo.preference.FixedSwitchPreference
-        style="?android:attr/preferenceStyle"
-        android:widgetLayout="@layout/preference_widget_fixed_switch"
+    <com.hippo.preference.SwitchPreference
         android:key="enable_analytics"
         android:title="@string/settings_about_enable_analytics"
         android:defaultValue="true"/>
 
-    <com.hippo.preference.SimpleDialogPreference
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        style="?android:attr/preferenceStyle"
+    <com.hippo.preference.MessagePreference
         android:key="about_analytics"
         android:title="@string/settings_about_about_analytics"
-        app:message="@string/analytics_explain"/>
+        app:dialogMessage="@string/analytics_explain"
+        app:dialogMessageHtml="true"
+        app:dialogMessageLinkify="true"/>
+
+    <Preference
+        android:key="check_for_updates"
+        android:title="@string/settings_about_check_for_updates"/>
+
+    <com.hippo.preference.SwitchPreference
+        android:key="beta_update_channel"
+        android:title="@string/settings_about_beta_update_channel"
+        android:defaultValue="@bool/beta"/>
 
 </PreferenceScreen>

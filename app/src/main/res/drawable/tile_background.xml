@@ -15,15 +15,10 @@
   ~ limitations under the License.
   -->
 
-<vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="120dp"
-    android:width="120dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <path
-        android:fillColor="@color/big_icon"
-        android:pathData="@string/pd_big_history"/>
+    <item android:state_activated="true" android:drawable="@drawable/tile_background_activated"/>
+    <item android:drawable="@drawable/transparent"/>
 
-</vector>
+</selector>

@@ -18,9 +18,9 @@ package com.hippo.ehviewer.ui.scene;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -28,16 +28,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.transition.TransitionInflater;
 import android.util.SparseBooleanArray;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -49,6 +47,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
+import com.github.amlcurran.showcaseview.targets.PointTarget;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.hippo.app.CheckBoxDialogBuilder;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.easyrecyclerview.FastScroller;
@@ -66,12 +68,9 @@ import com.hippo.ehviewer.download.DownloadManager;
 import com.hippo.ehviewer.download.DownloadService;
 import com.hippo.ehviewer.spider.SpiderDen;
 import com.hippo.ehviewer.ui.GalleryActivity;
-import com.hippo.ehviewer.ui.annotation.ViewLifeCircle;
-import com.hippo.ehviewer.ui.annotation.WholeLifeCircle;
 import com.hippo.ehviewer.widget.SimpleRatingView;
 import com.hippo.rippleold.RippleSalon;
 import com.hippo.scene.Announcer;
-import com.hippo.scene.TransitionHelper;
 import com.hippo.unifile.UniFile;
 import com.hippo.util.ApiHelper;
 import com.hippo.util.DrawableManager;
@@ -82,6 +81,7 @@ import com.hippo.yorozuya.FileUtils;
 import com.hippo.yorozuya.LongList;
 import com.hippo.yorozuya.ObjectUtils;
 import com.hippo.yorozuya.ResourcesUtils;
+import com.hippo.yorozuya.SimpleHandler;
 import com.hippo.yorozuya.ViewUtils;
 
 import java.util.ArrayList;
@@ -99,26 +99,29 @@ public class DownloadsScene extends ToolbarScene
 
     public static final String ACTION_CLEAR_DOWNLOAD_SERVICE = "clear_download_service";
 
+    /*---------------
+     Whole life cycle
+     ---------------*/
     @Nullable
-    @ViewLifeCircle
-    private EasyRecyclerView mRecyclerView;
+    private DownloadManager mDownloadManager;
     @Nullable
-    @ViewLifeCircle
-    private ViewTransition mViewTransition;
-    @Nullable
-    @ViewLifeCircle
-    private FabLayout mFabLayout;
-
-    @Nullable
-    @ViewLifeCircle
-    private DownloadAdapter mAdapter;
-
-    @Nullable
-    @WholeLifeCircle
     private String mLabel;
     @Nullable
-    @WholeLifeCircle
     private List<DownloadInfo> mList;
+
+    /*---------------
+     View life cycle
+     ---------------*/
+    @Nullable
+    private EasyRecyclerView mRecyclerView;
+    @Nullable
+    private ViewTransition mViewTransition;
+    @Nullable
+    private FabLayout mFabLayout;
+    @Nullable
+    private DownloadAdapter mAdapter;
+    @Nullable
+    private LinearLayoutManager mLayoutManager;
 
     @Override
     public int getNavCheckedItem() {
@@ -142,8 +145,8 @@ public class DownloadsScene extends ToolbarScene
 
         handleArguments(getArguments());
 
-        DownloadManager manager = EhApplication.getDownloadManager(getContext());
-        manager.addDownloadInfoListener(this);
+        mDownloadManager = EhApplication.getDownloadManager(getContext());
+        mDownloadManager.addDownloadInfoListener(this);
 
         if (savedInstanceState == null) {
             onInit();
@@ -156,19 +159,28 @@ public class DownloadsScene extends ToolbarScene
     public void onDestroy() {
         super.onDestroy();
         mList = null;
-        DownloadManager manager = EhApplication.getDownloadManager(getContext());
-        manager.removeDownloadInfoListener(null);
+
+        DownloadManager manager = mDownloadManager;
+        if (null == manager) {
+            manager = EhApplication.getDownloadManager(getContext());
+        } else {
+            mDownloadManager = null;
+        }
+        manager.removeDownloadInfoListener(this);
     }
 
     private void updateForLabel() {
-        DownloadManager manager = EhApplication.getDownloadManager(getContext());
+        if (null == mDownloadManager) {
+            return;
+        }
+
         if (mLabel == null) {
-            mList = manager.getDefaultDownloadInfoList();
+            mList = mDownloadManager.getDefaultDownloadInfoList();
         } else {
-            mList = manager.getLabelDownloadInfoList(mLabel);
+            mList = mDownloadManager.getLabelDownloadInfoList(mLabel);
             if (mList == null) {
                 mLabel = null;
-                mList = manager.getDefaultDownloadInfoList();
+                mList = mDownloadManager.getDefaultDownloadInfoList();
             }
         }
 
@@ -221,7 +233,8 @@ public class DownloadsScene extends ToolbarScene
         mAdapter = new DownloadAdapter();
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setSelector(RippleSalon.generateRippleDrawable(false));
         mRecyclerView.setDrawSelectorOnTop(true);
         mRecyclerView.hasFixedSize();
@@ -250,13 +263,85 @@ public class DownloadsScene extends ToolbarScene
         mFabLayout.setAutoCancel(false);
         mFabLayout.setOnClickFabListener(this);
 
-        if (mList == null || mList.isEmpty()) {
-            mViewTransition.showView(1);
-        } else {
-            mViewTransition.showView(0);
-        }
+        updateView();
+
+        guide();
 
         return view;
+    }
+
+    private void guide() {
+        if (Settings.getGuideDownloadThumb()) {
+            SimpleHandler.getInstance().post(new Runnable() {
+                @Override
+                public void run() {
+                    guideDownloadThumb();
+                }
+            });
+        } else {
+            guideDownloadLabels();
+        }
+    }
+
+    private void guideDownloadThumb() {
+        if (!Settings.getGuideDownloadThumb() || null == mLayoutManager || null == mRecyclerView) {
+            guideDownloadLabels();
+            return;
+        }
+        int position = mLayoutManager.findFirstCompletelyVisibleItemPosition();
+        if (position < 0) {
+            guideDownloadLabels();
+            return;
+        }
+        RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(position);
+        if (null == holder) {
+            guideDownloadLabels();
+            return;
+        }
+
+        new ShowcaseView.Builder(getActivity())
+                .withMaterialShowcase()
+                .setStyle(R.style.Guide)
+                .setTarget(new ViewTarget(((DownloadHolder) holder).thumb))
+                .blockAllTouches()
+                .setContentTitle(R.string.guide_download_thumb_title)
+                .setContentText(R.string.guide_download_thumb_text)
+                .replaceEndButton(R.layout.button_guide)
+                .setShowcaseEventListener(new SimpleShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                        ViewUtils.removeFromParent(showcaseView);
+                        Settings.putGuideDownloadThumb(false);
+                        guideDownloadLabels();
+                    }
+                }).build();
+    }
+
+    private void guideDownloadLabels() {
+        if (!Settings.getGuideDownloadLabels()) {
+            return;
+        }
+
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        Point point = new Point();
+        display.getSize(point);
+
+        new ShowcaseView.Builder(getActivity())
+                .withMaterialShowcase()
+                .setStyle(R.style.Guide)
+                .setTarget(new PointTarget(point.x, point.y / 3))
+                .blockAllTouches()
+                .setContentTitle(R.string.guide_download_labels_title)
+                .setContentText(R.string.guide_download_labels_text)
+                .replaceEndButton(R.layout.button_guide)
+                .setShowcaseEventListener(new SimpleShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                        ViewUtils.removeFromParent(showcaseView);
+                        Settings.puttGuideDownloadLabels(false);
+                        openDrawer(Gravity.RIGHT);
+                    }
+                }).build();
     }
 
     @Override
@@ -264,6 +349,17 @@ public class DownloadsScene extends ToolbarScene
         super.onViewCreated(view, savedInstanceState);
         updateTitle();
         setNavigationIcon(R.drawable.v_arrow_left_dark_x24);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        mRecyclerView = null;
+        mFabLayout = null;
+        mViewTransition = null;
+        mAdapter = null;
+        mLayoutManager = null;
     }
 
     @Override
@@ -292,26 +388,23 @@ public class DownloadsScene extends ToolbarScene
                 return true;
             }
             case R.id.action_stop_all: {
-                Intent intent = new Intent(getActivity(), DownloadService.class);
-                intent.setAction(DownloadService.ACTION_STOP_ALL);
-                getActivity().startService(intent);
+                if (null != mDownloadManager) {
+                    mDownloadManager.stopAllDownload();
+                }
                 return true;
-            }
-            case R.id.action_label: {
-                openDrawer(Gravity.RIGHT);
             }
         }
         return false;
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        mRecyclerView = null;
-        mFabLayout = null;
-        mViewTransition = null;
-        mAdapter = null;
+    public void updateView() {
+        if (mViewTransition != null) {
+            if (mList == null || mList.size() == 0) {
+                mViewTransition.showView(1);
+            } else {
+                mViewTransition.showView(0);
+            }
+        }
     }
 
     @Override
@@ -331,7 +424,11 @@ public class DownloadsScene extends ToolbarScene
                         startScene(new Announcer(DownloadLabelsScene.class));
                         return true;
                     case R.id.action_default_download_label:
-                        DownloadManager dm = EhApplication.getDownloadManager(getContext());
+                        DownloadManager dm = mDownloadManager;
+                        if (null == dm) {
+                            return true;
+                        }
+
                         List<DownloadLabel> list = dm.getLabelList();
                         final String[] items = new String[list.size() + 2];
                         items[0] = getString(R.string.let_me_select);
@@ -387,13 +484,7 @@ public class DownloadsScene extends ToolbarScene
                 if (!ObjectUtils.equal(label, mLabel)) {
                     mLabel = label;
                     updateForLabel();
-                    if (mViewTransition != null) {
-                        if (mList == null || mList.size() == 0) {
-                            mViewTransition.showView(1);
-                        } else {
-                            mViewTransition.showView(0);
-                        }
-                    }
+                    updateView();
                     closeDrawer(Gravity.RIGHT);
                 }
             }
@@ -524,10 +615,9 @@ public class DownloadsScene extends ToolbarScene
                     break;
                 }
                 case 2: { // Stop
-                    Intent intent = new Intent(getActivity(), DownloadService.class);
-                    intent.setAction(DownloadService.ACTION_STOP_RANGE);
-                    intent.putExtra(DownloadService.KEY_GID_LIST, gidList);
-                    getActivity().startService(intent);
+                    if (null != mDownloadManager) {
+                        mDownloadManager.stopRangeDownload(gidList);
+                    }
                     // Cancel check mode
                     recyclerView.outOfCustomChoiceMode();
                     break;
@@ -573,6 +663,7 @@ public class DownloadsScene extends ToolbarScene
         if (mAdapter != null) {
             mAdapter.notifyItemInserted(position);
         }
+        updateView();
     }
 
     @Override
@@ -599,27 +690,14 @@ public class DownloadsScene extends ToolbarScene
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
         }
-
-        if (mViewTransition != null) {
-            if (mList != null && mList.size() == 0) {
-                mViewTransition.showView(1);
-            } else {
-                mViewTransition.showView(0);
-            }
-        }
+        updateView();
     }
 
     @Override
     public void onChange() {
         mLabel = null;
         updateForLabel();
-        if (mViewTransition != null) {
-            if (mList == null || mList.size() == 0) {
-                mViewTransition.showView(1);
-            } else {
-                mViewTransition.showView(0);
-            }
-        }
+        updateView();
     }
 
     @Override
@@ -630,13 +708,7 @@ public class DownloadsScene extends ToolbarScene
 
         mLabel = to;
         updateForLabel();
-        if (mViewTransition != null) {
-            if (mList == null || mList.size() == 0) {
-                mViewTransition.showView(1);
-            } else {
-                mViewTransition.showView(0);
-            }
-        }
+        updateView();
     }
 
     @Override
@@ -647,10 +719,7 @@ public class DownloadsScene extends ToolbarScene
         if (mAdapter != null) {
             mAdapter.notifyItemRemoved(position);
         }
-
-        if (mList != null && mList.size() == 0 && mViewTransition != null) {
-            mViewTransition.showView(1);
-        }
+        updateView();
     }
 
     @Override
@@ -689,22 +758,36 @@ public class DownloadsScene extends ToolbarScene
         holder.rating.setVisibility(View.VISIBLE);
         holder.category.setVisibility(View.VISIBLE);
         holder.state.setVisibility(View.VISIBLE);
-        holder.progressBar.setVisibility(View.INVISIBLE);
-        holder.percent.setVisibility(View.INVISIBLE);
-        holder.speed.setVisibility(View.INVISIBLE);
+        holder.progressBar.setVisibility(View.GONE);
+        holder.percent.setVisibility(View.GONE);
+        holder.speed.setVisibility(View.GONE);
+        if (info.state == DownloadInfo.STATE_WAIT || info.state == DownloadInfo.STATE_DOWNLOAD) {
+            holder.start.setVisibility(View.GONE);
+            holder.stop.setVisibility(View.VISIBLE);
+        } else {
+            holder.start.setVisibility(View.VISIBLE);
+            holder.stop.setVisibility(View.GONE);
+        }
 
         holder.state.setText(state);
     }
 
     @SuppressLint("SetTextI18n")
     private void bindProgress(DownloadHolder holder, DownloadInfo info) {
-        holder.uploader.setVisibility(View.INVISIBLE);
-        holder.rating.setVisibility(View.INVISIBLE);
-        holder.category.setVisibility(View.INVISIBLE);
-        holder.state.setVisibility(View.INVISIBLE);
+        holder.uploader.setVisibility(View.GONE);
+        holder.rating.setVisibility(View.GONE);
+        holder.category.setVisibility(View.GONE);
+        holder.state.setVisibility(View.GONE);
         holder.progressBar.setVisibility(View.VISIBLE);
         holder.percent.setVisibility(View.VISIBLE);
         holder.speed.setVisibility(View.VISIBLE);
+        if (info.state == DownloadInfo.STATE_WAIT || info.state == DownloadInfo.STATE_DOWNLOAD) {
+            holder.start.setVisibility(View.GONE);
+            holder.stop.setVisibility(View.VISIBLE);
+        } else {
+            holder.start.setVisibility(View.VISIBLE);
+            holder.stop.setVisibility(View.GONE);
+        }
 
         if (info.total <= 0 || info.finished < 0) {
             holder.percent.setText(null);
@@ -751,10 +834,9 @@ public class DownloadsScene extends ToolbarScene
             }
 
             // Delete
-            Intent intent = new Intent(getActivity(), DownloadService.class);
-            intent.setAction(DownloadService.ACTION_DELETE);
-            intent.putExtra(DownloadService.KEY_GID, mGalleryInfo.gid);
-            getActivity().startService(intent);
+            if (null != mDownloadManager) {
+                mDownloadManager.deleteDownload(mGalleryInfo.gid);
+            }
 
             // Delete image files
             boolean checked = mBuilder.isChecked();
@@ -794,10 +876,9 @@ public class DownloadsScene extends ToolbarScene
             }
 
             // Delete
-            Intent intent = new Intent(getActivity(), DownloadService.class);
-            intent.setAction(DownloadService.ACTION_DELETE_RANGE);
-            intent.putExtra(DownloadService.KEY_GID_LIST, mGidList);
-            getActivity().startService(intent);
+            if (null != mDownloadManager) {
+                mDownloadManager.deleteRangeDownload(mGidList);
+            }
 
             // Delete image files
             boolean checked = mBuilder.isChecked();
@@ -908,8 +989,7 @@ public class DownloadsScene extends ToolbarScene
                 args.putParcelable(GalleryDetailScene.KEY_GALLERY_INFO, list.get(index));
                 Announcer announcer = new Announcer(GalleryDetailScene.class).setArgs(args);
                 if (ApiHelper.SUPPORT_TRANSITION) {
-                    DownloadHolder holder = (DownloadHolder) recyclerView.getChildViewHolder(itemView);
-                    announcer.setTranHelper(new EnterGalleryDetailTransaction(holder));
+                    announcer.setTranHelper(new EnterGalleryDetailTransaction(thumb));
                 }
                 startScene(announcer);
             } else if (start == v) {
@@ -918,14 +998,13 @@ public class DownloadsScene extends ToolbarScene
                 intent.putExtra(DownloadService.KEY_GALLERY_INFO, list.get(index));
                 getActivity().startService(intent);
             } else if (stop == v) {
-                Intent intent = new Intent(getActivity(), DownloadService.class);
-                intent.setAction(DownloadService.ACTION_STOP);
-                intent.putExtra(DownloadService.KEY_GID, list.get(index).gid);
-                getActivity().startService(intent);
+                if (null != mDownloadManager) {
+                    mDownloadManager.stopDownload(list.get(index).gid);
+                }
             } else if (delete == v) {
                 GalleryInfo galleryInfo = list.get(index);
                 CheckBoxDialogBuilder builder = new CheckBoxDialogBuilder(getContext(),
-                        getString(R.string.download_remove_dialog_message, galleryInfo.title),
+                        getString(R.string.download_remove_dialog_message, EhUtils.getSuitableTitle(galleryInfo)),
                         getString(R.string.download_remove_dialog_check_text),
                         Settings.getRemoveImageFiles());
                 DeleteDialogHelper helper = new DeleteDialogHelper(galleryInfo, builder);
@@ -933,38 +1012,6 @@ public class DownloadsScene extends ToolbarScene
                         .setPositiveButton(android.R.string.ok, helper)
                         .show();
             }
-        }
-    }
-
-    private static class EnterGalleryDetailTransaction implements TransitionHelper {
-
-        private final DownloadHolder mHolder;
-
-        public EnterGalleryDetailTransaction(DownloadHolder holder) {
-            mHolder = holder;
-        }
-
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-        @Override
-        public boolean onTransition(Context context, FragmentTransaction transaction,
-                Fragment exit, Fragment enter) {
-            if (mHolder == null || !(enter instanceof GalleryDetailScene)) {
-                return false;
-            }
-
-            exit.setSharedElementReturnTransition(
-                    TransitionInflater.from(context).inflateTransition(R.transition.trans_move));
-            exit.setExitTransition(
-                    TransitionInflater.from(context).inflateTransition(android.R.transition.fade));
-            enter.setSharedElementEnterTransition(
-                    TransitionInflater.from(context).inflateTransition(R.transition.trans_move));
-            enter.setEnterTransition(
-                    TransitionInflater.from(context).inflateTransition(android.R.transition.fade));
-            transaction.addSharedElement(mHolder.thumb, mHolder.thumb.getTransitionName());
-            transaction.addSharedElement(mHolder.title, mHolder.title.getTransitionName());
-            transaction.addSharedElement(mHolder.uploader, mHolder.uploader.getTransitionName());
-            transaction.addSharedElement(mHolder.category, mHolder.category.getTransitionName());
-            return true;
         }
     }
 
@@ -991,7 +1038,7 @@ public class DownloadsScene extends ToolbarScene
             }
             DownloadInfo info = mList.get(position);
             holder.thumb.load(EhCacheKeyFactory.getThumbKey(info.gid), info.thumb, true);
-            holder.title.setText(info.title);
+            holder.title.setText(EhUtils.getSuitableTitle(info));
             holder.uploader.setText(info.uploader);
             holder.rating.setRating(info.rating);
             TextView category = holder.category;
@@ -1006,9 +1053,6 @@ public class DownloadsScene extends ToolbarScene
             if (ApiHelper.SUPPORT_TRANSITION) {
                 long gid = info.gid;
                 holder.thumb.setTransitionName(TransitionNameFactory.getThumbTransitionName(gid));
-                holder.title.setTransitionName(TransitionNameFactory.getTitleTransitionName(gid));
-                holder.uploader.setTransitionName(TransitionNameFactory.getUploaderTransitionName(gid));
-                holder.category.setTransitionName(TransitionNameFactory.getCategoryTransitionName(gid));
             }
         }
 

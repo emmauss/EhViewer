@@ -38,6 +38,7 @@ import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.GalleryDetail;
 import com.hippo.rippleold.RippleSalon;
 import com.hippo.yorozuya.LayoutUtils;
+import com.hippo.yorozuya.ViewUtils;
 
 import java.util.ArrayList;
 
@@ -47,6 +48,9 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
     public static final String KEY_KEYS = "keys";
     public static final String KEY_VALUES = "values";
 
+    /*---------------
+     Whole life cycle
+     ---------------*/
     @Nullable
     private ArrayList<String> mKeys;
     @Nullable
@@ -147,7 +151,7 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.scene_gallery_info, container, false);
 
-        EasyRecyclerView recyclerView = (EasyRecyclerView) view.findViewById(R.id.recycler_view);
+        EasyRecyclerView recyclerView = (EasyRecyclerView) ViewUtils.$$(view, R.id.recycler_view);
         InfoAdapter adapter = new InfoAdapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
@@ -184,7 +188,7 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
 
     @Override
     public void onNavigationClick() {
-        finish();
+        onBackPressed();
     }
 
     private static class InfoHolder extends RecyclerView.ViewHolder {

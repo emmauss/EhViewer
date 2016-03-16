@@ -17,16 +17,17 @@
 package com.hippo.ehviewer;
 
 import android.app.ActivityManager;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Debug;
 import android.support.annotation.NonNull;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.hippo.beerbelly.LruCacheEx;
 import com.hippo.beerbelly.SimpleDiskCache;
 import com.hippo.conaco.Conaco;
 import com.hippo.ehviewer.client.EhClient;
@@ -53,6 +54,8 @@ public class EhApplication extends SceneApplication implements Thread.UncaughtEx
 
     private static final String TAG = EhApplication.class.getSimpleName();
 
+    public static final boolean BETA = true;
+
     private static final boolean DEBUG_CONACO = false;
     private static final boolean DEBUG_NATIVE_MEMORY = false;
 
@@ -65,9 +68,9 @@ public class EhApplication extends SceneApplication implements Thread.UncaughtEx
     private OkHttpClient mOkHttpClient;
     private BitmapHelper mBitmapHelper;
     private Conaco<Bitmap> mConaco;
-    private LruCacheEx<Long, GalleryDetail> mGalleryDetailCache;
-    private LruCacheEx<String, LargePreviewSet> mLargePreviewSetCache;
-    private LruCacheEx<Long, Integer> mPreviewPagesCache;
+    private LruCache<Long, GalleryDetail> mGalleryDetailCache;
+    private LruCache<String, LargePreviewSet> mLargePreviewSetCache;
+    private LruCache<Long, Integer> mPreviewPagesCache;
     private SimpleDiskCache mSpiderInfoCache;
     private DownloadManager mDownloadManager;
 
@@ -107,6 +110,26 @@ public class EhApplication extends SceneApplication implements Thread.UncaughtEx
 
         if (DEBUG_NATIVE_MEMORY) {
             debugNativeMemory();
+        }
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+            if (null != mConaco) {
+                mConaco.clearMemoryCache();
+            }
+            if (null != mGalleryDetailCache) {
+                mGalleryDetailCache.evictAll();
+            }
+            if (null != mLargePreviewSetCache) {
+                mLargePreviewSetCache.evictAll();
+            }
+            if (null != mPreviewPagesCache) {
+                mPreviewPagesCache.evictAll();
+            }
         }
     }
 
@@ -222,31 +245,31 @@ public class EhApplication extends SceneApplication implements Thread.UncaughtEx
     }
 
     @NonNull
-    public static LruCacheEx<Long, GalleryDetail> getGalleryDetailCache(@NonNull Context context) {
+    public static LruCache<Long, GalleryDetail> getGalleryDetailCache(@NonNull Context context) {
         EhApplication application = ((EhApplication) context.getApplicationContext());
         if (application.mGalleryDetailCache == null) {
             // Max size 25, 3 min timeout
-            application.mGalleryDetailCache = new LruCacheEx<>(25,  3 * 60 * 1000);
+            application.mGalleryDetailCache = new LruCache<>(25);
         }
         return application.mGalleryDetailCache;
     }
 
     @NonNull
-    public static LruCacheEx<String, LargePreviewSet> getLargePreviewSetCache(@NonNull Context context) {
+    public static LruCache<String, LargePreviewSet> getLargePreviewSetCache(@NonNull Context context) {
         EhApplication application = ((EhApplication) context.getApplicationContext());
         if (application.mLargePreviewSetCache == null) {
             // Max size 50, 3 min timeout
-            application.mLargePreviewSetCache = new LruCacheEx<>(50,  3 * 60 * 1000);
+            application.mLargePreviewSetCache = new LruCache<>(50);
         }
         return application.mLargePreviewSetCache;
     }
 
     @NonNull
-    public static LruCacheEx<Long, Integer> getPreviewPagesCache(@NonNull Context context) {
+    public static LruCache<Long, Integer> getPreviewPagesCache(@NonNull Context context) {
         EhApplication application = ((EhApplication) context.getApplicationContext());
         if (application.mPreviewPagesCache == null) {
             // Max size 50, 3 min timeout
-            application.mPreviewPagesCache = new LruCacheEx<>(50,  3 * 60 * 1000);
+            application.mPreviewPagesCache = new LruCache<>(50);
         }
         return application.mPreviewPagesCache;
     }

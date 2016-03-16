@@ -49,6 +49,7 @@ import com.hippo.ehviewer.client.exception.EhException;
 import com.hippo.ehviewer.ui.GalleryActivity;
 import com.hippo.scene.SceneFragment;
 import com.hippo.scene.StageActivity;
+import com.hippo.util.LayoutUtils2;
 import com.hippo.widget.ContentLayout;
 import com.hippo.widget.LoadImageView;
 import com.hippo.widget.Slider;
@@ -110,8 +111,15 @@ public class GalleryPreviewsScene extends ToolbarScene implements EasyRecyclerVi
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        boolean hasFirstRefresh;
+        if (mHelper != null && 1 == mHelper.getShownViewIndex()) {
+            hasFirstRefresh = false;
+        } else {
+            hasFirstRefresh = mHasFirstRefresh;
+        }
+        outState.putBoolean(KEY_HAS_FIRST_REFRESH, hasFirstRefresh);
         outState.putParcelable(KEY_GALLERY_INFO, mGalleryInfo);
-        outState.putBoolean(KEY_HAS_FIRST_REFRESH, mHasFirstRefresh);
     }
 
     @Nullable
@@ -125,7 +133,9 @@ public class GalleryPreviewsScene extends ToolbarScene implements EasyRecyclerVi
 
         mAdapter = new GalleryPreviewAdapter();
         recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3)); // TODO hardcode
+        int minWidth = getResources().getDimensionPixelOffset(R.dimen.preview_grid_min_width);
+        int spanCount = LayoutUtils2.calculateSpanCount(getContext(), minWidth);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
         int padding = LayoutUtils.dp2pix(getContext(), 4);
         recyclerView.setPadding(padding, padding, padding, padding);
         recyclerView.setClipToPadding(false);
@@ -147,8 +157,15 @@ public class GalleryPreviewsScene extends ToolbarScene implements EasyRecyclerVi
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        if (null != mHelper) {
+            if (1 == mHelper.getShownViewIndex()) {
+                mHasFirstRefresh = false;
+            }
+            mHelper = null;
+        }
+
         mAdapter = null;
-        mHelper = null;
     }
 
     @Override
@@ -188,7 +205,7 @@ public class GalleryPreviewsScene extends ToolbarScene implements EasyRecyclerVi
 
     @Override
     public void onNavigationClick() {
-        finish();
+        onBackPressed();
     }
 
     @Override
@@ -245,7 +262,7 @@ public class GalleryPreviewsScene extends ToolbarScene implements EasyRecyclerVi
         @Override
         protected void getPageData(final int taskId, int type, int page) {
             if (null == mClient || null == mGalleryInfo) {
-                onGetExpection(taskId, new EhException(getString(R.string.error_cannot_find_gallery)));
+                onGetException(taskId, new EhException(getString(R.string.error_cannot_find_gallery)));
                 return;
             }
 
@@ -318,7 +335,7 @@ public class GalleryPreviewsScene extends ToolbarScene implements EasyRecyclerVi
 
     private void onGetLargePreviewSetFailure(Exception e, int taskId) {
         if (mHelper != null && mHelper.isCurrentTask(taskId) && isViewCreated()) {
-            mHelper.onGetExpection(taskId, e);
+            mHelper.onGetException(taskId, e);
         }
     }
 

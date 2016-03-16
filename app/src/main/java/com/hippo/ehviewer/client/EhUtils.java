@@ -115,9 +115,14 @@ public class EhUtils {
         }
     }
 
+    public static void signOut(Context context) {
+        EhApplication.getEhCookieStore(context).signOut();
+        Settings.putAvatar(null);
+        Settings.putDisplayName(null);
+    }
+
     public static boolean hasSignedIn(Context context) {
-        return EhApplication.getEhCookieStore(context).hasSignedIn() &&
-                Settings.getDisplayName() != null;
+        return EhApplication.getEhCookieStore(context).hasSignedIn();
     }
 
     public static String getSuitableTitle(GalleryInfo gi) {

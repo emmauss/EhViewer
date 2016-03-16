@@ -19,6 +19,7 @@ package com.hippo.ehviewer.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.IdRes;
@@ -34,6 +35,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hippo.ehviewer.Crash;
@@ -73,6 +75,8 @@ public final class MainActivity extends StageActivity
 
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
+    private static final int REQUEST_CODE_UPDATE_PROFILE = 0;
+
     private static final String KEY_NAV_CHECKED_ITEM = "nav_checked_item";
 
     public static final int CHECK_STEP_WARNING = 0;
@@ -94,6 +98,8 @@ public final class MainActivity extends StageActivity
     private FrameLayout mRightDrawer;
     @Nullable
     private LoadImageView mAvatar;
+    @Nullable
+    private TextView mDisplayName;
 
     private int mNavCheckedItem = 0;
 
@@ -257,8 +263,15 @@ public final class MainActivity extends StageActivity
         mRightDrawer = (FrameLayout) ViewUtils.$$(this, R.id.right_drawer);
         View headerLayout = mNavView.getHeaderView(0);
         mAvatar = (LoadImageView) ViewUtils.$$(headerLayout, R.id.avatar);
+        mDisplayName = (TextView) ViewUtils.$$(headerLayout, R.id.display_name);
 
-        updateAvatar();
+        // Pre-L need shadow drawable
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow_left, Gravity.LEFT);
+            mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow_right, Gravity.RIGHT);
+        }
+
+        updateProfile();
 
         if (mNavView != null) {
             mNavView.setNavigationItemSelectedListener(this);
@@ -266,6 +279,7 @@ public final class MainActivity extends StageActivity
 
         if (savedInstanceState == null) {
             onInit();
+            CommonOperations.checkUpdate(this, false);
         } else {
             onRestore(savedInstanceState);
         }
@@ -294,6 +308,8 @@ public final class MainActivity extends StageActivity
         mDrawerLayout = null;
         mNavView = null;
         mRightDrawer = null;
+        mAvatar = null;
+        mDisplayName = null;
     }
 
     @Override
@@ -343,8 +359,8 @@ public final class MainActivity extends StageActivity
         }
     }
 
-    public void updateAvatar() {
-        if (null == mAvatar) {
+    public void updateProfile() {
+        if (null == mAvatar || null == mDisplayName) {
             return;
         }
 
@@ -354,6 +370,12 @@ public final class MainActivity extends StageActivity
         } else {
             mAvatar.load(avatarUrl, avatarUrl);
         }
+
+        String displayName = Settings.getDisplayName();
+        if (TextUtils.isEmpty(displayName)) {
+            displayName = getString(R.string.default_display_name);
+        }
+        mDisplayName.setText(displayName);
     }
 
     public int getDrawerLockMode(int edgeGravity) {

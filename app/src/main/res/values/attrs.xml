@@ -40,19 +40,6 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="FitPaddingLayout">
-        <attr name="fitTop1" format="reference"/>
-        <attr name="fitTop2" format="reference"/>
-        <attr name="fitTop3" format="reference"/>
-        <attr name="content1" format="reference"/>
-        <attr name="content2" format="reference"/>
-        <attr name="content3" format="reference"/>
-        <attr name="fitBottom1" format="reference"/>
-        <attr name="fitBottom2" format="reference"/>
-        <attr name="fitBottom3" format="reference"/>
-        <attr name="once" format="boolean"/>
-    </declare-styleable>
-
     <declare-styleable name="CheckTextView">
         <attr name="maskColor" format="color"/>
     </declare-styleable>
@@ -88,7 +75,7 @@
         <attr name="dark" format="boolean"/>
     </declare-styleable>
 
-    <declare-styleable name="FixedSwitchPreference">
+    <declare-styleable name="SwitchPreference">
         <!-- The summary for the Preference in a PreferenceActivity screen when the
              SwitchPreference is checked. If separate on/off summaries are not
              needed, the summary attribute can be used instead. -->
@@ -108,10 +95,6 @@
         <attr name="disableDependentsState" format="boolean"/>
     </declare-styleable>
 
-    <declare-styleable name="SimpleDialogPreference">
-        <attr name="message" format="string"/>
-    </declare-styleable>
-
     <declare-styleable name="BatteryView">
         <attr name="color"/>
         <attr name="warningColor" format="color"/>
@@ -120,6 +103,34 @@
     <declare-styleable name="Indicating">
         <attr name="indicatorHeight" format="dimension"/>
         <attr name="indicatorColor" format="color"/>
+    </declare-styleable>
+
+    <declare-styleable name="DialogPreference">
+        <attr name="dialogTitle" format="string"/>
+        <attr name="dialogIcon" format="reference"/>
+        <attr name="positiveButtonText" format="string"/>
+        <attr name="negativeButtonText" format="string"/>
+        <attr name="dialogLayout" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="MessagePreference">
+        <attr name="dialogMessage" format="string"/>
+        <attr name="dialogMessageHtml" format="boolean"/>
+        <attr name="dialogMessageLinkify" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="ListPreference">
+        <!-- The human-readable array to present as a list. Each entry must have a corresponding
+             index in entryValues. -->
+        <attr name="entries" format="reference"/>
+        <!-- The array to find the value to save for a preference when an entry from
+             entries is selected. If a user clicks on the second item in entries, the
+             second item in this array will be saved to the preference. -->
+        <attr name="entryValues" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="ActivityPreference">
+        <attr name="activity" format="string"/>
     </declare-styleable>
 
 </resources>

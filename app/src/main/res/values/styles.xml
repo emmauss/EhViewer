@@ -102,6 +102,10 @@
         <item name="android:textColor">?attr/colorPrimary</item>
     </style>
 
+    <style name="ButtonInCard.Accent">
+        <item name="android:textColor">?attr/colorAccent</item>
+    </style>
+
     <style name="Slider">
         <item name="thickness">2dp</item>
         <item name="radius">6dp</item>
@@ -131,6 +135,20 @@
 
     <style name="Widget.Design.FloatingActionButton.Mini">
         <item name="fabSize">mini</item>
+    </style>
+
+    <style name="Guide.Title" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="Guide.Text" parent="TextAppearance.AppCompat.Subhead">
+        <item name="android:textColor">#deffffff</item>
+    </style>
+
+    <style name="Guide">
+        <item name="sv_backgroundColor">#e5009688</item>
+        <item name="sv_titleTextAppearance">@style/Guide.Title</item>
+        <item name="sv_detailTextAppearance">@style/Guide.Text</item>
     </style>
 
 </resources>

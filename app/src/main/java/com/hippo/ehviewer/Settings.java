@@ -23,9 +23,11 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.hippo.ehviewer.client.EhConfig;
 import com.hippo.ehviewer.client.data.FavListUrlBuilder;
+import com.hippo.ehviewer.client.data.ListUrlBuilder;
 import com.hippo.ehviewer.gallery.gl.GalleryView;
 import com.hippo.ehviewer.gallery.gl.ImageView;
 import com.hippo.unifile.UniFile;
@@ -37,6 +39,8 @@ import com.hippo.yorozuya.NumberUtils;
 import java.io.File;
 
 public class Settings {
+
+    private static final String TAG = Settings.class.getSimpleName();
 
     private static Context sContext;
     private static SharedPreferences sSettingsPre;
@@ -50,12 +54,20 @@ public class Settings {
 
     private static EhConfig loadEhConfig() {
         EhConfig ehConfig= new EhConfig();
-        // TODO
+        ehConfig.excludedLanguages = getExcludedLanguages();
+        ehConfig.defaultCategories = getDefaultCategories();
+        ehConfig.excludedNamespaces = getExcludedTagNamespaces();
+        ehConfig.setDirty();
         return ehConfig;
     }
 
     public static boolean getBoolean(String key, boolean defValue) {
-        return sSettingsPre.getBoolean(key, defValue);
+        try {
+            return sSettingsPre.getBoolean(key, defValue);
+        } catch (ClassCastException e) {
+            Log.d(TAG, "Get ClassCastException when get " + key + " value", e);
+            return defValue;
+        }
     }
 
     public static void putBoolean(String key, boolean value) {
@@ -63,7 +75,12 @@ public class Settings {
     }
 
     public static int getInt(String key, int defValue) {
-        return sSettingsPre.getInt(key, defValue);
+        try {
+            return sSettingsPre.getInt(key, defValue);
+        } catch (ClassCastException e) {
+            Log.d(TAG, "Get ClassCastException when get " + key + " value", e);
+            return defValue;
+        }
     }
 
     public static void putInt(String key, int value) {
@@ -71,7 +88,12 @@ public class Settings {
     }
 
     public static long getLong(String key, long defValue) {
-        return sSettingsPre.getLong(key, defValue);
+        try {
+            return sSettingsPre.getLong(key, defValue);
+        } catch (ClassCastException e) {
+            Log.d(TAG, "Get ClassCastException when get " + key + " value", e);
+            return defValue;
+        }
     }
 
     public static void putLong(String key, long value) {
@@ -79,7 +101,12 @@ public class Settings {
     }
 
     public static float getFloat(String key, float defValue) {
-        return sSettingsPre.getFloat(key, defValue);
+        try {
+            return sSettingsPre.getFloat(key, defValue);
+        } catch (ClassCastException e) {
+            Log.d(TAG, "Get ClassCastException when get " + key + " value", e);
+            return defValue;
+        }
     }
 
     public static void putFloat(String key, float value) {
@@ -87,7 +114,12 @@ public class Settings {
     }
 
     public static String getString(String key, String defValue) {
-        return sSettingsPre.getString(key, defValue);
+        try {
+            return sSettingsPre.getString(key, defValue);
+        } catch (ClassCastException e) {
+            Log.d(TAG, "Get ClassCastException when get " + key + " value", e);
+            return defValue;
+        }
     }
 
     public static void putString(String key, String value) {
@@ -95,7 +127,12 @@ public class Settings {
     }
 
     public static int getIntFromStr(String key, int defValue) {
-        return NumberUtils.parseIntSafely(sSettingsPre.getString(key, Integer.toString(defValue)), defValue);
+        try {
+            return NumberUtils.parseIntSafely(sSettingsPre.getString(key, Integer.toString(defValue)), defValue);
+        } catch (ClassCastException e) {
+            Log.d(TAG, "Get ClassCastException when get " + key + " value", e);
+            return defValue;
+        }
     }
 
     public static void putIntToStr(String key, int value) {
@@ -164,11 +201,57 @@ public class Settings {
     /********************
      ****** Eh
      ********************/
+    public static final String KEY_LIST_MODE = "list_mode";
+    private static final int DEFAULT_LIST_MODE = 0;
+
+    public static int getListMode() {
+        return getIntFromStr(KEY_LIST_MODE, DEFAULT_LIST_MODE);
+    }
+
     private static final String KEY_SHOW_JPN_TITLE = "show_jpn_title";
     private static final boolean DEFAULT_SHOW_JPN_TITLE = false;
 
     public static boolean getShowJpnTitle() {
         return getBoolean(KEY_SHOW_JPN_TITLE, DEFAULT_SHOW_JPN_TITLE);
+    }
+
+    public static final String KEY_DEFAULT_CATEGORIES = "default_categories";
+    public static final int DEFAULT_DEFAULT_CATEGORIES = ListUrlBuilder.ALL_CATEGORT;
+
+    public static int getDefaultCategories() {
+        return getInt(KEY_DEFAULT_CATEGORIES, DEFAULT_DEFAULT_CATEGORIES);
+    }
+
+    public static void putDefaultCategories(int value) {
+        sEhConfig.defaultCategories = value;
+        sEhConfig.setDirty();
+        putInt(KEY_DEFAULT_CATEGORIES, value);
+    }
+
+    public static final String KEY_EXCLUDED_TAG_NAMESPACES = "excluded_tag_namespaces";
+    private static final int DEFAULT_EXCLUDED_TAG_NAMESPACES = 0;
+
+    public static int getExcludedTagNamespaces() {
+        return getInt(KEY_EXCLUDED_TAG_NAMESPACES, DEFAULT_EXCLUDED_TAG_NAMESPACES);
+    }
+
+    public static void putExcludedTagNamespaces(int value) {
+        sEhConfig.excludedNamespaces = value;
+        sEhConfig.setDirty();
+        putInt(KEY_EXCLUDED_TAG_NAMESPACES, value);
+    }
+
+    public static final String KEY_EXCLUDED_LANGUAGES = "excluded_languages";
+    private static final String DEFAULT_EXCLUDED_LANGUAGES = null;
+
+    public static String getExcludedLanguages() {
+        return getString(KEY_EXCLUDED_LANGUAGES, DEFAULT_EXCLUDED_LANGUAGES);
+    }
+
+    public static void putExcludedLanguages(String value) {
+        sEhConfig.excludedLanguages = value;
+        sEhConfig.setDirty();
+        putString(KEY_EXCLUDED_LANGUAGES, value);
     }
 
     /********************
@@ -322,6 +405,28 @@ public class Settings {
         putString(KEY_DEFAULT_DOWNLOAD_LABEL, value);
     }
 
+    private static final String KEY_MULTI_THREAD_DOWNLOAD = "download_thread";
+    private static final int DEFAULT_MULTI_THREAD_DOWNLOAD = 3;
+
+    public static int getMultiThreadDownload() {
+        return getIntFromStr(KEY_MULTI_THREAD_DOWNLOAD, DEFAULT_MULTI_THREAD_DOWNLOAD);
+    }
+
+    public static void putMultiThreadDownload(int value) {
+        putIntToStr(KEY_MULTI_THREAD_DOWNLOAD, value);
+    }
+
+    private static final String KEY_PRELOAD_IMAGE = "preload_image";
+    private static final int DEFAULT_PRELOAD_IMAGE = 5;
+
+    public static int getPreloadImage() {
+        return getIntFromStr(KEY_PRELOAD_IMAGE, DEFAULT_PRELOAD_IMAGE);
+    }
+
+    public static void putPreloadImage(int value) {
+        putIntToStr(KEY_PRELOAD_IMAGE, value);
+    }
+
     /********************
      ****** Favorites
      ********************/
@@ -389,7 +494,7 @@ public class Settings {
     }
 
     // -1 for local, 0 - 9 for cloud favorite, other for no default fav slot
-    private static final String KEY_DEFAULT_FAV_SLOT = "default_favorite";
+    private static final String KEY_DEFAULT_FAV_SLOT = "default_favorite_2";
     public static final int INVALID_DEFAULT_FAV_SLOT = -2;
     private static final int DEFAULT_DEFAULT_FAV_SLOT = INVALID_DEFAULT_FAV_SLOT;
 
@@ -489,17 +594,92 @@ public class Settings {
     }
 
     /********************
+     ****** Update
+     ********************/
+    private static final String KEY_BETA_UPDATE_CHANNEL = "beta_update_channel";
+    private static final boolean DEFAULT_BETA_UPDATE_CHANNEL = EhApplication.BETA;
+
+    public static boolean getBetaUpdateChannel() {
+        return getBoolean(KEY_BETA_UPDATE_CHANNEL, DEFAULT_BETA_UPDATE_CHANNEL);
+    }
+
+    public static void putBetaUpdateChannel(boolean value) {
+        putBoolean(KEY_BETA_UPDATE_CHANNEL, value);
+    }
+
+    /********************
      ****** Crash
      ********************/
-    public static final String KEY_CRASH_FILENAME = "crash_filename";
-    public static final String VALUE_CRASH_FILENAME = null;
+    private static final String KEY_CRASH_FILENAME = "crash_filename";
+    private static final String DEFAULT_CRASH_FILENAME = null;
 
     public static String getCrashFilename() {
-        return getString(KEY_CRASH_FILENAME, VALUE_CRASH_FILENAME);
+        return getString(KEY_CRASH_FILENAME, DEFAULT_CRASH_FILENAME);
     }
 
     @SuppressLint("CommitPrefEdits")
     public static void putCrashFilename(String value) {
         sSettingsPre.edit().putString(KEY_CRASH_FILENAME, value).commit();
+    }
+
+    /********************
+     ****** Advanced
+     ********************/
+    public static final String KEY_SAVE_PARSE_ERROR_BODY = "save_parse_error_body";
+    private static final boolean DEFAULT_SAVE_PARSE_ERROR_BODY = EhApplication.BETA;
+
+    public static boolean getSaveParseErrorBody() {
+        return getBoolean(KEY_SAVE_PARSE_ERROR_BODY, DEFAULT_SAVE_PARSE_ERROR_BODY);
+    }
+
+    public static void putSaveParseErrorBody(boolean value) {
+        putBoolean(KEY_SAVE_PARSE_ERROR_BODY, value);
+    }
+
+    /********************
+     ****** Guide
+     ********************/
+    private static final String KEY_GUIDE_QUICK_SEARCH = "guide_quick_search";
+    private static final boolean DEFAULT_GUIDE_QUICK_SEARCH = true;
+
+    public static boolean getGuideQuickSearch() {
+        return getBoolean(KEY_GUIDE_QUICK_SEARCH, DEFAULT_GUIDE_QUICK_SEARCH);
+    }
+
+    public static void putGuideQuickSearch(boolean value) {
+        putBoolean(KEY_GUIDE_QUICK_SEARCH, value);
+    }
+
+    private static final String KEY_GUIDE_COLLECTIONS = "guide_collections";
+    private static final boolean DEFAULT_GUIDE_COLLECTIONS = true;
+
+    public static boolean getGuideCollections() {
+        return getBoolean(KEY_GUIDE_COLLECTIONS, DEFAULT_GUIDE_COLLECTIONS);
+    }
+
+    public static void putGuideCollections(boolean value) {
+        putBoolean(KEY_GUIDE_COLLECTIONS, value);
+    }
+
+    private static final String KEY_GUIDE_DOWNLOAD_THUMB = "guide_download_thumb";
+    private static final boolean DEFAULT_GUIDE_DOWNLOAD_THUMB = true;
+
+    public static boolean getGuideDownloadThumb() {
+        return getBoolean(KEY_GUIDE_DOWNLOAD_THUMB, DEFAULT_GUIDE_DOWNLOAD_THUMB);
+    }
+
+    public static void putGuideDownloadThumb(boolean value) {
+        putBoolean(KEY_GUIDE_DOWNLOAD_THUMB, value);
+    }
+
+    private static final String KEY_GUIDE_DOWNLOAD_LABELS = "guide_download_labels";
+    private static final boolean DEFAULT_GUIDE_DOWNLOAD_LABELS = true;
+
+    public static boolean getGuideDownloadLabels() {
+        return getBoolean(KEY_GUIDE_DOWNLOAD_LABELS, DEFAULT_GUIDE_DOWNLOAD_LABELS);
+    }
+
+    public static void puttGuideDownloadLabels(boolean value) {
+        putBoolean(KEY_GUIDE_DOWNLOAD_LABELS, value);
     }
 }

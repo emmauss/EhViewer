@@ -17,13 +17,13 @@
 
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="120dp"
-    android:width="120dp"
+    android:height="24dp"
+    android:width="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
 
     <path
-        android:fillColor="@color/big_icon"
-        android:pathData="@string/pd_big_label"/>
+        android:fillColor="?attr/colorPrimary"
+        android:pathData="@string/pd_adb"/>
 
 </vector>

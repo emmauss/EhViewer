@@ -15,8 +15,13 @@
   ~ limitations under the License.
   -->
 
-<View
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="1dp"
-    android:background="@color/divider"/>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.hippo.preference.SwitchPreference
+        android:key="save_parse_error_body"
+        android:title="@string/settings_about_save_parse_error_body"
+        android:summary="@string/settings_about_save_parse_error_body_summary"
+        android:defaultValue="@bool/beta"/>
+
+</PreferenceScreen>
